@@ -3,6 +3,7 @@ import json
 import torch
 from fastapi import FastAPI
 import requests
+from dict_to_list import *
 from llava.model.builder import load_pretrained_model
 from llava.utils import disable_torch_init
 from llava.mm_utils import process_images, tokenizer_image_token
@@ -21,8 +22,8 @@ tokenizer = None
 image_processor = None
 
 # Paths
-MODEL_PATH = "/media/aditya/Projects/Logo_Matching/journal_watch/try/LLaVA/models/models--liuhaotian--llava-v1.6-34b/snapshots/e2a1f782a20d26b855072029738bfd0107d85e96"
-CACHE_DIR = "/media/aditya/Projects/Logo_Matching/journal_watch/try/LLaVA/models"
+MODEL_PATH = "/media/aditya/Projects/Logo_Matching/journal_watch/Logomatchingdemo/LLaVA/models/models--liuhaotian--llava-v1.6-34b/snapshots/e2a1f782a20d26b855072029738bfd0107d85e96"
+CACHE_DIR = "/media/aditya/Projects/Logo_Matching/journal_watch/Logomatchingdemo/LLaVA/models"
 OUTPUT_FILE = "user_logo.json"
 
 def load_image(image_file):
@@ -104,13 +105,16 @@ async def startup_event():
 
 @app.post("/process/")
 async def process_image_endpoint():
-    folder_path = "user_logo"
+
+    folder_path = "user_logo/logos"
 
     with open(OUTPUT_FILE, 'w') as file:
         pass
     
     for filename in os.listdir(folder_path):
+        
         if filename.lower().endswith((".jpg", ".png", ".jfif")):
+
             image_file = os.path.join(folder_path, filename)
             image_tensor, image_size = process_image(image_file)
             inp = "Explain the above image, divide your explanation in four parts: shape, texture, text, and colors."
@@ -143,93 +147,9 @@ async def process_image_endpoint():
             date_str = "01/05/2024"
             data = {"Date": date_str, "filename": os.path.basename(image_file), "outputs": outputs}
             save_results(OUTPUT_FILE, data)
-    
-    with open(OUTPUT_FILE, "r") as file:
-        data = [json.loads(line) for line in file]
-        return data[0]
+            
+    write_json_file(OUTPUT_FILE)
 
-
-# import subprocess
-# import json
-# import os
-# from fastapi import FastAPI, File, UploadFile
-# from shutil import copyfileobj
-
-# import sys
-# from pathlib import Path
-
-# sys.path.append(str(Path(__file__).resolve().parent.parent))
-
-# app = FastAPI()
-
-
-# def extract_text_from_json_file(json_file_path):
-#     with open(json_file_path, 'r') as file:
-#         json_data = json.load(file)
-
-#     if isinstance(json_data, dict):
-#         filename = json_data.get("filename")
-#         text = json_data.get("outputs")
-
-#         if filename is not None and text is not None:
-#             keywords1 = ["Shape of the Image", "Texture of the Image", "Text of the Image", "Colors of the Image"]
-#             keywords2 = ["Shape:", "Texture:", "Text:", "Colors:"]
-
-#             def extract_text(text, keywords):
-#                 split_text = text.split("\n\n")
-#                 formatted_text = {}
-#                 current_category = None
-#                 for part in split_text:
-#                     for keyword in keywords:
-#                         if keyword in part:
-#                             current_category = keyword
-#                             formatted_text[current_category] = []
-#                             break
-#                     if current_category:
-#                         if current_category == "Shape of the Image" and "Shape of the Image" not in part:
-#                             formatted_text[current_category].extend(part.split())
-#                         else:
-#                             formatted_text[current_category].append(part)
-#                 return formatted_text
-
-#             formatted_text1 = extract_text(text, keywords1)
-#             formatted_text2 = extract_text(text, keywords2)
-
-#             # If output from keywords1 is not generated, use the formatted text from keywords2
-#             if not formatted_text1:
-#                 formatted_text = formatted_text2
-#             else:
-#                 formatted_text = formatted_text1
-
-#             # Write the extracted data to a new JSON file
-#             extracted_data = {"filename": filename, "extracted_text": formatted_text}
-#             with open("user_logo.json", 'w') as outfile:
-#                 json.dump(extracted_data, outfile, indent=4)
-
-
-# @app.post("/process/")
-# async def process_image():
-#     model_path = "/media/aditya/Projects/Logo_Matching/journal_watch/LLaVA/models/models--liuhaotian--llava-v1.6-34b/snapshots/e2a1f782a20d26b855072029738bfd0107d85e96"
-#     folder_path = "user_logo"
-#     os.environ['LAVA_MODEL'] = model_path
-#     subprocess.run(["python", "-m", "llava.serve.desc_generate_res", "--model-path", model_path, "--folder_path", folder_path, "--load-4bit"])
-        
-#     with open("user_logo.json", "r") as file:
-#         data = json.load(file)
-#         #for llama index appraoch
-#         if data:
-#             with open('user_logo.json', 'w') as file:
-#                 pass  
-#         return data
-    
-#         #for simple embedding approach
-
-#         # if data:
-#         #     extract_text_from_json_file("user_logo.json")
-#         #     with open("user_logo.json", "r") as refactored_file:
-#         #         refactored_data = json.load(refactored_file)
-#         #     os.remove("user_logo.json")
-#         # return refactored_data
-
-
-
+    # with open(OUTPUT_FILE, "r") as file:
+    #     data = [json.loads(line) for line in file]
+    #     return data[0]

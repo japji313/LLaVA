@@ -162,6 +162,7 @@ import argparse
 import torch
 import os
 import json
+from dict_to_list import *
 from datetime import datetime
 from llava.constants import IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN
 from llava.conversation import conv_templates, SeparatorStyle
@@ -268,7 +269,6 @@ def main(args, tokenizer, model, image_processor, image_file):
         json.dump(data, file)
         file.write('\n')
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--model-path", type=str, default="facebook/opt-350m")
@@ -294,6 +294,7 @@ if __name__ == "__main__":
 
     # Write the initial dictionary with the date
     date_str = datetime.now().strftime("%d/%m/%Y")
+    date_str = "01/05/2024"
     initial_data = {"Date": date_str}
     with open(args.output_file, 'w') as file:
         json.dump(initial_data, file)
@@ -301,6 +302,8 @@ if __name__ == "__main__":
 
     folder_path = args.folder_path
     for filename in os.listdir(folder_path):
-        if filename.endswith(".jpg") or filename.endswith(".png") or filename.endswith(".jfif"):  # Adjust file extensions as needed
+        if filename.endswith(".jpg") or filename.endswith(".png") or filename.endswith(".jfif"):
             image_file = os.path.join(folder_path, filename)
             main(args, tokenizer, model, image_processor, image_file)
+    
+    write_json_file(args.output_file)

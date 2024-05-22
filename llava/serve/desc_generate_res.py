@@ -2,6 +2,7 @@ import argparse
 import torch
 import os
 import json
+from dict_to_list import *
 from datetime import datetime
 from llava.constants import IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN
 from llava.conversation import conv_templates, SeparatorStyle
@@ -154,5 +155,6 @@ if __name__ == "__main__":
         if filename.endswith(".jpg") or filename.endswith(".png") or filename.endswith(".jfif"):  # Adjust file extensions as needed
             image_file = os.path.join(folder_path, filename)
             main(args,tokenizer, model, image_processor,image_file)
-
+    
+    write_json_file(args.output_file)
 
