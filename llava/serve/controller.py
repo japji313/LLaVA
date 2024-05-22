@@ -114,7 +114,7 @@ class Controller:
 
         for w_name, w_info in self.worker_info.items():
             model_names.update(w_info.model_names)
-
+            print(model_names)
         return list(model_names)
 
     def get_worker_address(self, model_name: str):
