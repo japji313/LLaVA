@@ -113,7 +113,7 @@ async def process_image_endpoint():
     
     for filename in os.listdir(folder_path):
         
-        if filename.lower().endswith((".jpg", ".png", ".jfif")):
+        if filename.lower().endswith((".jpg", ".png", ".jfif",".jpeg")):
 
             image_file = os.path.join(folder_path, filename)
             image_tensor, image_size = process_image(image_file)
