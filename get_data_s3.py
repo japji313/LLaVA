@@ -43,9 +43,24 @@ def download_images_from_s3_folder(s3_url, local_dir):
     except Exception as e:
         print(f"Error downloading images: {e}")
 
-# Example S3 URL and local directory
-local_dir = "journal_no_2157"
+def get_and_update_last_journal_number(file_path):
+    try:
+        with open(file_path, 'r+') as file:
+            lines = file.readlines()
+            if lines:
+                last_line = lines[-1].strip()
+                last_journal_number = int(last_line)
+                return last_journal_number
+            else:
+                raise ValueError("Journal file is empty.")
+    except Exception as e:
+        print(f"Error reading or updating journal file: {e}")
+        raise
+
+journal_file_path = "journal.txt"
+journal_number = get_and_update_last_journal_number(journal_file_path)
+
+local_dir = f"journal_no_{journal_number}"
 s3_url = f"s3://logomatch/{local_dir}/images/"
 
-# Call the function to download images from the S3 folder
 download_images_from_s3_folder(s3_url, local_dir)

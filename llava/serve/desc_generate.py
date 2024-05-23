@@ -157,6 +157,9 @@
 #     # with open(args.output_file, 'w') as f:
 #     #     json.dump(results, f)
 
+import sys
+dict_to_list_path = '/media/aditya/Projects/Logo_Matching/journal_watch/Logomatchingdemo/LLaVA/'
+sys.path.append(dict_to_list_path)
 
 import argparse
 import torch
@@ -269,13 +272,48 @@ def main(args, tokenizer, model, image_processor, image_file):
         json.dump(data, file)
         file.write('\n')
 
+
+def get_last_journal_number(file_path):
+    try:
+        with open(file_path, 'r+') as file:
+            lines = file.readlines()
+            if lines:
+                last_line = lines[-1].strip()
+                last_journal_number = int(last_line)
+                return last_journal_number
+            else:
+                raise ValueError("Journal file is empty.")
+    except Exception as e:
+        print(f"Error reading  journal file: {e}")
+        raise
+
+def update_last_journal_number(file_path):
+    try:
+        with open(file_path, 'r+') as file:
+            lines = file.readlines()
+            if lines:
+                last_line = lines[-1].strip()
+                last_journal_number = int(last_line)
+                new_journal_number = last_journal_number + 1
+                file.seek(0, os.SEEK_END)
+                file.write(f"{new_journal_number}\n")
+            else:
+                raise ValueError("Journal file is empty.")
+    except Exception as e:
+        print(f"Error updating journal file: {e}")
+        raise
+
 if __name__ == "__main__":
+
+    journal_file_path = "journal.txt"
+    journal_number = get_last_journal_number(journal_file_path)
+
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model-path", type=str, default="facebook/opt-350m")
+    parser.add_argument("--model-path", type=str, default="models/models--liuhaotian--llava-v1.6-34b/snapshots/e2a1f782a20d26b855072029738bfd0107d85e96")
     parser.add_argument("--model-base", type=str, default=None)
     parser.add_argument("--image-file", type=str)
-    parser.add_argument("--output-file", type=str, default="journal_no_2157.json")
-    parser.add_argument("--folder_path", type=str, required=True)
+    parser.add_argument("--output-file", type=str, default=f"journal_no_{journal_number}.json")
+    parser.add_argument("--folder_path", type=str, default=f"journal_no_{journal_number}")
     parser.add_argument("--device", type=str, default="cuda")
     parser.add_argument("--conv-mode", type=str, default=None)
     parser.add_argument("--temperature", type=float, default=0.2)
@@ -306,4 +344,5 @@ if __name__ == "__main__":
             image_file = os.path.join(folder_path, filename)
             main(args, tokenizer, model, image_processor, image_file)
     
-    write_json_file(args.output_file)
+    write_json_file(f"journal_no_{journal_number}.json")
+    update_last_journal_number(journal_file_path)
